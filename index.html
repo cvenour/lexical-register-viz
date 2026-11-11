@@ -1,0 +1,94 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>Lexical register joke classifier</title>
+  <meta name="description" content="Step through classifier #4 from a PhD dissertation on lexical incongruity: word frequencies, log entropy and pairwise cosines.">
+  <link rel="icon" href="favicon.svg" type="image/svg+xml">
+  <link rel="stylesheet" href="css/style.css">
+</head>
+<body>
+  <a class="skip" href="#text">Skip to the text box</a>
+
+  <div class="wrap">
+    <header class="head">
+      <h1>Is this text a lexical register joke?</h1>
+      <p class="lede">A lexical register joke is funny because the tone of some of its words clashes with the tone of the others, as in <em>"Hail Caesar! The enemy has been totalled."</em> This page runs classifier #4 from a dissertation on lexical incongruity, one step at a time.</p>
+      <p class="lede">The classifier counts how often each word appears in 25 collections of writing, from the Bible to rap lyrics. It then finds the two words in the text whose counts are least alike.</p>
+    </header>
+
+    <noscript><p>This page needs JavaScript to run.</p></noscript>
+
+    <section class="input" aria-labelledby="h-input">
+      <h2 id="h-input">Choose a text</h2>
+      <div class="field">
+        <label for="sample">Stock sentence</label>
+        <select id="sample"></select>
+      </div>
+      <div class="field">
+        <label for="text">Or type your own text (2 to 40 words)</label>
+        <textarea id="text" rows="2" maxlength="600" spellcheck="false"></textarea>
+      </div>
+      <p id="message" class="message" role="status"></p>
+    </section>
+
+    <nav class="steps" aria-label="Steps">
+      <button id="step1" class="step" type="button"><span class="num"><span>1</span></span><span class="label"><span class="full">Show word frequencies</span><span class="brief">Frequencies</span></span></button>
+      <button id="step2" class="step" type="button" disabled><span class="num"><span>2</span></span><span class="label"><span class="full">Apply log entropy</span><span class="brief">Log entropy</span></span></button>
+      <button id="step3" class="step" type="button" disabled><span class="num"><span>3</span></span><span class="label"><span class="full">Is it a joke?</span><span class="brief">Joke?</span></span></button>
+      <button id="reset" class="quiet" type="button" disabled>Start over</button>
+    </nav>
+
+    <section class="stage" aria-label="Results">
+      <p id="caption" class="caption" aria-live="polite"></p>
+
+      <div id="verdict" class="verdict" aria-live="polite" hidden></div>
+
+      <figure id="matrix-panel" class="panel" hidden>
+        <div class="panel-head">
+          <div>
+            <h2 id="matrix-title"></h2>
+            <p id="matrix-sub"></p>
+          </div>
+          <div id="matrix-legend" class="legend"></div>
+        </div>
+        <div id="matrix-scroll" class="scroll">
+          <svg id="matrix" role="img" aria-label="Table of colored tiles. Each row is a word from the text and each column is a collection of writing. The same numbers are in the table below."></svg>
+        </div>
+        <p id="matrix-hint" class="hint" hidden>The matrix is wider than the screen. Scroll sideways to see every column.</p>
+        <details class="table-view">
+          <summary>Show the numbers as a table</summary>
+          <div class="table-scroll"><table id="matrix-table"></table></div>
+        </details>
+      </figure>
+    </section>
+
+    <details class="how">
+      <summary>How the classifier works</summary>
+      <ol>
+        <li>Each word becomes a row of 25 numbers: how often it appears per million words in each collection of writing. The British National Corpus (BNC) column is the count in the CUVPlus dictionary, used as it is.</li>
+        <li>Log entropy treats each column on its own. A column gets a weight from 0 to 1: near 1 when a few words account for most of it, near 0 when all the words have about the same count. Each number then becomes log10(count + 1) × weight.</li>
+        <li>Every pair of rows is compared by cosine. A score near 1 means two words appear in similar kinds of writing. A score near 0 means they don't.</li>
+        <li>The lowest score in the text decides. At or below 0.25, the text is called a lexical register joke.</li>
+      </ol>
+      <p>Stopwords such as "the" and "of" stay in. A word that appears in none of the 25 collections has a row of zeros, so it scores 0 against every other word. On the 22 texts in the dissertation's final test (11 jokes and 11 newspaper quotes), this rule was right for 20.</p>
+    </details>
+
+    <footer class="foot">
+      <p>From the dissertation <em>A Computational Model of Lexical Incongruity in Humorous Text</em> by Chris Venour, University of Aberdeen, 2013. Classifier #4 is described in chapter 5 and tested in chapter 6.</p>
+      <p>The page holds word counts only, not the texts they came from. The New Yorker captions and Monty Python lines are quoted as examples.</p>
+    </footer>
+  </div>
+
+  <svg id="fly" aria-hidden="true" width="0" height="0"></svg>
+  <div id="tip" class="tip" role="tooltip" hidden></div>
+
+  <script src="vendor/d3.v7.9.0.min.js"></script>
+  <script src="lexicon.js"></script>
+  <script src="js/core.js"></script>
+  <script src="js/samples.js"></script>
+  <script src="js/corpora.js"></script>
+  <script src="js/app.js"></script>
+</body>
+</html>
